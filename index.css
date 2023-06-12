@@ -1,0 +1,52 @@
+body{
+   padding:0;
+   width:100vw;
+   margin:0;
+   color:#757575;
+   font-family:Helvetica;
+   position:relative;
+   font-size:14px;
+   text-align:center;
+}
+body > div{
+   width:100%;
+}
+.head{
+   height:70px;
+   font-size:40px;
+   line-height:70px;
+   background:#BCC7B7;
+   color:#FFF;
+   font-weight:bold;
+}
+.body{
+   min-height:calc(100% - 100px);
+}
+.foot{
+   height:30px;
+   background:#EEE;
+   position:absolute;
+   bottom:0;
+   line-height:30px;
+   display:none;
+}
+.card{
+   width:30vmin;
+   height:35vmin;
+   margin-left:2.5vmin;
+   margin-top:2.5vmin;
+   background:#EEE;
+   float:left;
+   border-radius:5px;
+}
+.card > div{
+   width:100%;
+}
+.ico{
+   height:80%;
+   line-height:14vmax;
+   font-size:10vmax;
+}
+.name{
+   height:20%;
+}
