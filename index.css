@@ -46,6 +46,10 @@ body > div{
    height:80%;
    line-height:14vmax;
    font-size:10vmax;
+   text-align:center;
+}
+.ico > img{
+   width:75%;
 }
 .name{
    height:20%;
