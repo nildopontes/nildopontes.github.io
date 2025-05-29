@@ -53,4 +53,5 @@ body > div{
 }
 .name{
    height:20%;
+   text-overflow:ellipsis;
 }
