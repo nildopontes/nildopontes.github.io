@@ -4,22 +4,20 @@ const drone = new ScaleDrone('OOgX7u3om3pEfCPf');
 const roomName = 'observable-nildopontes';
 const configuration = {
   iceServers: [{
-    // Coloque aqui o endereço do servidor STUN que desejar utilizar
     urls: 'stun:stun.voipstunt.com'
   }]
 };
 let room;
 let pc;
 
-//este par de funções serve somente par direcionar as mensagens para a CONSOLE do navegador, ou caso seja importante poderia-mos direcionar para um email, um banco de dados, entre outros.
 function onSuccess(msg) {
-    console.log(msg); // aqui na verdade, é uma simples LOG de que foi bem sucedida uma chamada
+    console.log(msg);
 };
 function onError(error) {
-  console.error(error); // aqui é simplesmente uma mensagem que informa o erro caso algum tenha ocorrido
+  console.error(error);
 };
 
-//abre a comunicação com o servidor de signaling para verificar quem está na sala
+// Evento disparado ao entrar no servidor de sinalização
 drone.on('open', error => {
   if (error) {
     return onError(error);
@@ -30,17 +28,17 @@ drone.on('open', error => {
       onError(error);
     }
   });
-  // Se recebermos um array com pelo menos 2 membros, significa que a sala está pronta e os servidores de sinalização ativos.
+  // Se recebermos um array com pelo menos 2 membros, significa que a sala está pronta para iniciar a chamada.
   room.on('members', members => {
     // Trabalha com os nomes e quantidade de usuario aqui
     onSuccess(members);
-    // Verifica se você é o primeiro ou segundo usuário, se for o segundo, então abrimos a oferta de troca de conexões para habilitar os fluxos de vídeo e audio WebRTC
+    // Verifica se você é o primeiro ou segundo usuário, se for o segundo, então iniciamos a oferta de conexão
     const isOfferer = members.length === 2;
     startWebRTC(isOfferer);
   });
 });
 
-// Esta mensagem, é a sinalização feita dentro do scaledrone que notifica um e o outro clientes com os dados para o WebRTC
+// Envia uma mensagem pelo servidor de sinalização para todos os membros presentes na sala
 function sendMessage(message) {
   drone.publish({
     room: roomName,
@@ -51,14 +49,14 @@ function sendMessage(message) {
 function startWebRTC(isOfferer) {
   pc = new RTCPeerConnection(configuration);
 
-  // 'onicecandidate' notifica um ou outro participante para permitir a troca de comunicação pelo WebRTC
+  // 'onicecandidate' é disparado sempre que o peer local encontra um novo icecandidate. A ação comum é enviar esse icecandidate para o peer remoto
   pc.onicecandidate = event => {
     if (event.candidate) {
       sendMessage({'candidate': event.candidate});
     }
   };
 
-  // Se é o segundo usuário, 'negotiationneeded' é criado e passa a oferecer o fluxo de dados entre os usuários
+  // Se é o segundo usuário, 'negotiationneeded' é criado e passa a oferecer a conexão local ao peer remoto
   if (isOfferer) {
     pc.onnegotiationneeded = () => {
       pc.createOffer().then(localDescCreated).catch(onError);
@@ -83,9 +81,9 @@ function startWebRTC(isOfferer) {
     stream.getTracks().forEach(track => pc.addTrack(track, stream));
   }, onError);
 
-  // Fica escutando o Scaledrone para receber os fluxos de troca de dados
+  // Fica escutando o Scaledrone para receber novas mensagens
   room.on('data', (message, client) => {
-    // verifica se mandamnos os dados da nossa conexão
+    // Encerra a função se a menagem recebida foi enviada por mim
     if (client.id === drone.clientId) {
       onSuccess(message);
       onSuccess(client);
@@ -101,7 +99,7 @@ function startWebRTC(isOfferer) {
         }
       }, onError);
     } else if (message.candidate) {
-      // Adiciona um novo ICE para esperar nova conexão
+      // Adiciona o icecandidate recebido do peer remoto à conaxão local
       pc.addIceCandidate(
         new RTCIceCandidate(message.candidate), onSuccess, onError
       );
