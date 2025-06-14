@@ -1,5 +1,6 @@
 var chunks = [];
 var mediaRecorder;
+var eu;
 
 const drone = new ScaleDrone('OOgX7u3om3pEfCPf');
 
@@ -48,6 +49,7 @@ drone.on('open', error => {
     onSuccess(members);
     // Verifica se você é o primeiro ou segundo usuário, se for o segundo, então iniciamos a oferta de conexão
     const isOfferer = members.length === 2;
+    eu = members.length;
     startWebRTC(isOfferer);
   });
 });
@@ -93,14 +95,15 @@ function startWebRTC(isOfferer) {
       };
     }
   };
-
-  navigator.mediaDevices.getUserMedia({
-    audio: true,
-    video: false,
-  }).then(stream => {
-    // Envia o stream ao peer remoto
-    stream.getTracks().forEach(track => pc.addTrack(track, stream));
-  }, onError);
+  if(eu == 1){
+     navigator.mediaDevices.getUserMedia({
+       audio: true,
+       video: false,
+     }).then(stream => {
+       // Envia o stream ao peer remoto
+       stream.getTracks().forEach(track => pc.addTrack(track, stream));
+     }, onError);
+  }
 
   // Fica escutando o Scaledrone para receber novas mensagens
   room.on('data', (message, client) => {
