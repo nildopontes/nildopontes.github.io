@@ -39,12 +39,14 @@ function addMember(member){
       audio.srcObject = stream;
       document.body.appendChild(audio);
    };
-   pcn.onnegotiationneeded = event => pcn.createOffer(offerOptions).then(offer => {
-      pcn.setLocalDescription(offer).then(() => {
-         console.log('Oferta para ' + member);
-         sendMessage({'sdp': pcn.localDescription}, member);
-      });
-   }).catch(err => console.log(err));
+   pcn.onnegotiationneeded = event => {
+      pcn.createOffer(offerOptions).then(offer => {
+         pcn.setLocalDescription(offer).then(() => {
+            console.log('Oferta para ' + member);
+            sendMessage({'sdp': pcn.localDescription}, member);
+         });
+      }).catch(err => console.log(err));
+   };
    pc[member] = pcn;
 }
 drone.on('open', error => {
