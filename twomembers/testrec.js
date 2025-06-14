@@ -3,6 +3,17 @@ var mediaRecorder;
 
 const drone = new ScaleDrone('OOgX7u3om3pEfCPf');
 
+function downloadFile(blob){
+   let a = document.createElement('a');
+   a.style.display = 'none';
+   document.body.appendChild(a);
+   a.href = window.URL.createObjectURL(blob, {type: "audio/webm;codecs=opus"});
+   a.setAttribute('download', 'sound.opus');
+   a.click();
+   window.URL.revokeObjectURL(a.href);
+   document.body.removeChild(a);
+}
+
 // Cria o nome físico da sala, no scaledrone, por uma regra deles, deve ser precedido da string 'observable-'
 const roomName = 'observable-nildopontes';
 const configuration = {
@@ -74,10 +85,10 @@ function startWebRTC(isOfferer) {
       mediaRecorder.onstop = e => {
         //chunks.push(e.data);
         const blob = new Blob(chunks, { type: "audio/ogg; codecs=opus" });
-        const audioURL = URL.createObjectURL(blob);
-        console.log(audioURL);
+        downloadFile(blob);
       };
       mediaRecorder.ondataavailable = e => {
+         console.log(1);
         chunks.push(e.data);
       };
     }
