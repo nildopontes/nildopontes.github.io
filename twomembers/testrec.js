@@ -62,6 +62,16 @@ function sendMessage(message) {
   });
 }
 
+function initStream(){
+   navigator.mediaDevices.getUserMedia({
+     audio: true,
+     video: false,
+   }).then(stream => {
+     // Envia o stream ao peer remoto
+     stream.getTracks().forEach(track => pc.addTrack(track, stream));
+   }, onError);
+}
+
 function startWebRTC(isOfferer) {
   // 'onicecandidate' é disparado sempre que o peer local encontra um novo icecandidate. A ação comum é enviar esse icecandidate para o peer remoto
   pc.onicecandidate = event => {
@@ -95,16 +105,6 @@ function startWebRTC(isOfferer) {
       };
     }
   };
-  if(eu == 1){
-     navigator.mediaDevices.getUserMedia({
-       audio: true,
-       video: false,
-     }).then(stream => {
-       // Envia o stream ao peer remoto
-       stream.getTracks().forEach(track => pc.addTrack(track, stream));
-     }, onError);
-  }
-
   // Fica escutando o Scaledrone para receber novas mensagens
   room.on('data', (message, client) => {
     // Encerra a função se a mensagem recebida foi enviada por mim
