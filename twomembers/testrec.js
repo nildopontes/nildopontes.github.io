@@ -17,8 +17,9 @@ var pc = {};
 
 function initStream(){
    navigator.mediaDevices.getUserMedia({audio: true, video: false}).then(stream => {
-      Object.entries(pc).forEach(([chave, pcn]) => {
-         pcn.addTrack(stream.getTracks()[0], stream);
+      Object.keys(pc).forEach(key => {
+         console.log('Stream enviado para ' + key);
+         pc[key].addTrack(stream.getTracks()[0]);
       });
    });
 }
@@ -26,19 +27,21 @@ function addMember(member){
    let pcn = new RTCPeerConnection(configuration);
    pcn.onicecandidate = event => {
       if(event.candidate){
+         console.log('icecandidate para ' + member);
          sendMessage({'candidate': event.candidate}, member);
       }
    };
    pcn.ontrack = event => {
-      console.log('Stream');
+      console.log('Stream de ' + member);
       const stream = event.streams[0];
-      let audio = new Audio();
+      let audio = document.createElement('audio');
       audio.setAttribute('id', member);
       audio.srcObject = stream;
       document.body.appendChild(audio);
    };
    pcn.createOffer(offerOptions).then(offer => {
       pcn.setLocalDescription(offer).then(() => {
+         console.log('Oferta para ' + member);
          sendMessage({'sdp': pcn.localDescription}, member);
       });
    }).catch(err => console.log(err));
@@ -59,17 +62,22 @@ drone.on('open', error => {
       if(members.length > 1){
          members.forEach(member => {
             if(member.id != drone.clientId){
+               console.log(member.id + ' membro na sala');
                addMember(member.id);
             }
          });
       }
-      startWebRTC(members.length);
+      startWebRTC();
    });
    room.on('member_join', member => {
+      console.log('membro novo');
       addMember(member.id);
    });
    room.on('member_leave', member => {
-      document.getElementById(member.id).remove();
+      let element = document.getElementById(member.id);
+      if(element) element.remove();
+      delete pc[member.id];
+      console.log('membro saiu');
    });
 });
 
@@ -81,11 +89,11 @@ function sendMessage(message, destinyId){
       message
    });
 }
-function startWebRTC(qtdMembers){
+function startWebRTC(){
    room.on('data', (message, member) => {
       if(message.destiny != drone.clientId) return;
       if(message.sdp){
-         pc[member.id].setRemoteDescription(new RTCSessionDescription(message.sdp), () => {
+         pc[member.id].setRemoteDescription(message.sdp, () => {
             if(pc[member.id].remoteDescription.type === 'offer'){
                pc[member.id].createAnswer().then(offer => pc[member.id].setLocalDescription(offer)).then(() => sendMessage({'sdp': pc[member.id].localDescription}, member.id)).catch(err => console.log(err));
             }
