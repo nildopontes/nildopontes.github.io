@@ -1,7 +1,7 @@
 'use strict';
 
 const drone = new ScaleDrone('OOgX7u3om3pEfCPf');
-
+const roomName = 'observable-nildopontes';
 const configuration = {
    iceServers: [{
       urls: 'stun:stun.l.google.com:19302'
