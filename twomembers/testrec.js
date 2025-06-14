@@ -12,45 +12,38 @@ const offerOptions = {
   offerToReceiveVideo: 0,
   voiceActivityDetection: false
 };
-var remoteAudio;
 var room;
-var pc = [new RTCPeerConnection(configuration), new RTCPeerConnection(configuration), new RTCPeerConnection(configuration)];
-document.addEventListener('DOMContentLoaded', function() {
-   remoteAudio = [remoteAudio1, remoteAudio2, remoteAudio3];
-});
-var clients = [{id: ''}, {id: ''}, {id: ''}];
+var pc = {};
 
 function initStream(){
    navigator.mediaDevices.getUserMedia({audio: true, video: false}).then(stream => {
-      pc.forEach((element, index) => {
-         element.addTrack(stream.getTracks()[0], stream);
+      Object.entries(pc).forEach(([chave, pcn]) => {
+         pcn.addTrack(stream.getTracks()[0], stream);
       });
    });
 }
-
-pc.forEach((element, index) => {
-   element.onicecandidate = event => {
+function addMember(member){
+   let pcn = new RTCPeerConnection(configuration);
+   pcn.onicecandidate = event => {
       if(event.candidate){
-         sendMessage({'candidate': event.candidate}, clients[index].id);
+         sendMessage({'candidate': event.candidate}, member);
       }
    };
-   element.ontrack = event => {
+   pcn.ontrack = event => {
+      console.log('Stream');
       const stream = event.streams[0];
-      remoteAudio[index].srcObject = stream;
+      let audio = new Audio();
+      audio.setAttribute('id', member);
+      audio.srcObject = stream;
+      document.body.appendChild(audio);
    };
-});
-function setAudioLayout(){
-   var qtdClients = 0;
-   clients.forEach((client, index) => {
-      if(client.id == ''){
-         remoteAudio[index].style.visibility = 'hidden';
-      }else{
-         qtdClients++;
-         remoteAudio[index].style.visibility = 'initial';
-      }
-   });
+   pcn.createOffer(offerOptions).then(offer => {
+      pcn.setLocalDescription(offer).then(() => {
+         sendMessage({'sdp': pcn.localDescription}, member);
+      });
+   }).catch(err => console.log(err));
+   pc[member] = pcn;
 }
-
 drone.on('open', error => {
    if(error){
       console.log(error);
@@ -64,34 +57,19 @@ drone.on('open', error => {
    });
    room.on('members', members => {
       if(members.length > 1){
-         setAudioLayout();
          members.forEach(member => {
             if(member.id != drone.clientId){
-               for(var i = 0; i < 3; i++){
-                  if(clients[i].id === ''){
-                     clients[i].id = member.id;
-                     break;
-                  }
-               }
+               addMember(member.id);
             }
          });
       }
-      setAudioLayout();
       startWebRTC(members.length);
    });
    room.on('member_join', member => {
-      for(var i = 0; i < 3; i++){
-         if(clients[i].id === ''){
-            clients[i].id = member.id;
-            break;
-         }
-      }
-      setAudioLayout();
+      addMember(member.id);
    });
    room.on('member_leave', member => {
-      const index = clients.findIndex(client => client.id === member.id);
-      clients[index].id = '';
-      setAudioLayout();
+      document.getElementById(member.id).remove();
    });
 });
 
@@ -104,29 +82,16 @@ function sendMessage(message, destinyId){
    });
 }
 function startWebRTC(qtdMembers){
-   if(qtdMembers > 1){
-      pc.forEach((element, index) => {
-         element.createOffer(offerOptions)
-                .then(offer => element.setLocalDescription(offer))
-                .then(() => {
-                   sendMessage({'sdp': element.localDescription}, clients[index].id);
-                }).catch(err => console.log(err));
-      });
-   }
-   room.on('data', (message, client) => {
+   room.on('data', (message, member) => {
       if(message.destiny != drone.clientId) return;
-      const index = clients.findIndex(member => member.id === client.id);
       if(message.sdp){
-         pc[index].setRemoteDescription(new RTCSessionDescription(message.sdp), () => {
-            if(pc[index].remoteDescription.type === 'offer'){
-               pc[index].createAnswer().then((offer) => pc[index].setLocalDescription(offer)).then(() => {
-                  sendMessage({'sdp': pc[index].localDescription}, clients[index].id);}).catch((err) => {
-                  console.log(err);
-               });
+         pc[member.id].setRemoteDescription(new RTCSessionDescription(message.sdp), () => {
+            if(pc[member.id].remoteDescription.type === 'offer'){
+               pc[member.id].createAnswer().then(offer => pc[member.id].setLocalDescription(offer)).then(() => sendMessage({'sdp': pc[member.id].localDescription}, member.id)).catch(err => console.log(err));
             }
          });
       }else if(message.candidate){
-         pc[index].addIceCandidate(message.candidate).catch(err => console.log(err));
+         pc[member.id].addIceCandidate(message.candidate).catch(err => console.log(err));
       }
    });
 }

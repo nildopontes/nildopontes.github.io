@@ -16,7 +16,6 @@
          }
          audio{
             background:gray;
-            visibility:hidden;
             border-radius:14px;
             border:5px solid #1C1C1C;
             margin:0;
@@ -26,10 +25,6 @@
       </style>
    </head>
    <body>
-      <audio id="remoteAudio1" controls autoplay></audio>
-      <audio id="remoteAudio2" controls autoplay></audio>
-      <audio id="remoteAudio3" controls autoplay></audio>
-      <input type="button" value="Desligar" id="btStop" onclick="mediaRecorder.stop(); pc.close()">
       <input type="button" value="Enviar Som" id="btStart" onclick="initStream()">
    </body>
 </html>
