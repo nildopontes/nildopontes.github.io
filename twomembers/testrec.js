@@ -39,7 +39,7 @@ function addMember(member){
       audio.srcObject = stream;
       document.body.appendChild(audio);
    };
-   pcn.createOffer(offerOptions).then(offer => {
+   pcn.onnegotiationneeded = event => pcn.createOffer(offerOptions).then(offer => {
       pcn.setLocalDescription(offer).then(() => {
          console.log('Oferta para ' + member);
          sendMessage({'sdp': pcn.localDescription}, member);
