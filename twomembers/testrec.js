@@ -1,5 +1,5 @@
-  let chunks = [];
-  let mediaRecorder;
+var chunks = [];
+var mediaRecorder;
 
 const drone = new ScaleDrone('OOgX7u3om3pEfCPf');
 
@@ -11,7 +11,7 @@ const configuration = {
   }]
 };
 let room;
-let pc;
+let pc = new RTCPeerConnection(configuration);
 
 function onSuccess(msg) {
     console.log(msg);
@@ -50,8 +50,6 @@ function sendMessage(message) {
 }
 
 function startWebRTC(isOfferer) {
-  pc = new RTCPeerConnection(configuration);
-
   // 'onicecandidate' é disparado sempre que o peer local encontra um novo icecandidate. A ação comum é enviar esse icecandidate para o peer remoto
   pc.onicecandidate = event => {
     if (event.candidate) {
@@ -74,7 +72,7 @@ function startWebRTC(isOfferer) {
       mediaRecorder = new MediaRecorder(stream);
       mediaRecorder.start();
       mediaRecorder.onstop = e => {
-        chunks.push(e.data);
+        //chunks.push(e.data);
         const blob = new Blob(chunks, { type: "audio/ogg; codecs=opus" });
         const audioURL = URL.createObjectURL(blob);
         console.log(audioURL);
