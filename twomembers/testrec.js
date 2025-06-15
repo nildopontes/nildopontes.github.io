@@ -34,6 +34,7 @@ function addMember(member){
    pcn.ontrack = event => {
       console.log('Stream de ' + member);
       const stream = event.streams[0];
+      console.log(event);
       let audio = document.createElement('audio');
       audio.setAttribute('id', member);
       audio.setAttribute('controls', '');
@@ -41,14 +42,12 @@ function addMember(member){
       audio.srcObject = stream;
       document.body.appendChild(audio);
    };
-   pcn.onnegotiationneeded = event => {
-      pcn.createOffer(offerOptions).then(offer => {
-         pcn.setLocalDescription(offer).then(() => {
-            console.log('Oferta para ' + member);
-            sendMessage({'sdp': pcn.localDescription}, member);
-         });
-      }).catch(err => console.log(err));
-   };
+   pcn.createOffer(offerOptions).then(offer => {
+      pcn.setLocalDescription(offer).then(() => {
+         console.log('Oferta para ' + member);
+         sendMessage({'sdp': pcn.localDescription}, member);
+      });
+   }).catch(err => console.log(err));
    pc[member] = pcn;
 }
 drone.on('open', error => {
