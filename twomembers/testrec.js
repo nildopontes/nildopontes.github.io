@@ -36,6 +36,8 @@ function addMember(member){
       const stream = event.streams[0];
       let audio = document.createElement('audio');
       audio.setAttribute('id', member);
+      audio.setAttribute('controls', '');
+      audio.setAttribute('autoplay', '');
       audio.srcObject = stream;
       document.body.appendChild(audio);
    };
