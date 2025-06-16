@@ -16,13 +16,11 @@ var room;
 var pc = {};
 var stream;
 
-navigator.mediaDevices.getUserMedia({audio: true, video: false}).then(s => {
-   stream = s.getTracks()[0];
-});
+navigator.mediaDevices.getUserMedia({audio: true, video: false}).then(s => stream = s);
 function initStream(){
    Object.keys(pc).forEach(key => {
       console.log('Stream enviado para ' + key);
-      pc[key].addTrack(stream);
+      pc[key].addTrack(stream.getTracks()[0], stream);
       pc[key].createOffer().then(offer => {
          pc[key].setLocalDescription(offer).then(() => {
             console.log('Oferta para ' + key);
