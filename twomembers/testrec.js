@@ -17,13 +17,15 @@ var pc = {};
 
 function initStream(){
    navigator.mediaDevices.getUserMedia({audio: true, video: false}).then(stream => {
+      console.log(stream);
       Object.keys(pc).forEach(key => {
          console.log('Stream enviado para ' + key);
-         pc[key].addTrack(stream.getTracks()[0], stream);
+         pc[key].addTrack(stream.getTracks()[0]);
       });
    });
 }
 function addMember(member){
+   console.log(member + ' adicionado');
    let pcn = new RTCPeerConnection(configuration);
    pcn.onicecandidate = event => {
       if(event.candidate){
