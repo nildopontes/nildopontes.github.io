@@ -25,8 +25,8 @@ function initStream(){
       pc[key].addTrack(stream);
       pc[key].createOffer(offerOptions).then(offer => {
          pc[key].setLocalDescription(offer).then(() => {
-            console.log('Oferta para ' + member);
-            sendMessage({'sdp': pc[key].localDescription}, member);
+            console.log('Oferta para ' + key);
+            sendMessage({'sdp': pc[key].localDescription}, key);
          });
       }).catch(err => console.log(err));
    });
