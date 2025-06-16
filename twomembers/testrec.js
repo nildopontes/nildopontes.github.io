@@ -23,7 +23,7 @@ function initStream(){
    Object.keys(pc).forEach(key => {
       console.log('Stream enviado para ' + key);
       pc[key].addTrack(stream);
-      pc[key].createOffer(offerOptions).then(offer => {
+      pc[key].createOffer().then(offer => {
          pc[key].setLocalDescription(offer).then(() => {
             console.log('Oferta para ' + key);
             sendMessage({'sdp': pc[key].localDescription}, key);
@@ -96,15 +96,19 @@ function sendMessage(message, destinyId){
    });
 }
 function startWebRTC(){
+   console.log('WebRTC iniciado');
    room.on('data', (message, member) => {
       if(message.destiny != drone.clientId) return;
       if(message.sdp){
+         console.log('SDP recebido de ' + member.id);
          pc[member.id].setRemoteDescription(message.sdp, () => {
             if(pc[member.id].remoteDescription.type === 'offer'){
+               console.log('SDP type is offer');
                pc[member.id].createAnswer().then(offer => pc[member.id].setLocalDescription(offer)).then(() => sendMessage({'sdp': pc[member.id].localDescription}, member.id)).catch(err => console.log(err));
             }
          });
       }else if(message.candidate){
+         console.log('Candidate recebido de ' + member.id);
          pc[member.id].addIceCandidate(message.candidate).catch(err => console.log(err));
       }
    });
