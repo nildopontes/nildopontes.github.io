@@ -25,10 +25,7 @@ body > div{
 .foot{
    height:30px;
    background:#EEE;
-   position:absolute;
-   bottom:0;
    line-height:30px;
-   display:none;
 }
 .card{
    width:30vmin;
