@@ -19,7 +19,7 @@ window.addEventListener('DOMContentLoaded', event => {
 function initStream(){
    Object.keys(pc).forEach(key => {
       console.log('Stream enviado para ' + key);
-      pc[key].addTrack(stream.getTracks()[0], stream);
+      pc[key].addTrack(stream.getTracks()[0]);
       pc[key].createOffer().then(offer => {
          pc[key].setLocalDescription(offer).then(() => {
             console.log('Oferta para ' + key);
@@ -39,7 +39,8 @@ function addMember(member){
    };
    pcn.ontrack = event => {
       console.log('Stream de ' + member);
-      const stream = event.streams[0];
+      //const stream = event.streams[0];
+      const stream = new MediaStream(event.track);
       console.log(event);
       let audio = document.createElement('audio');
       audio.setAttribute('id', member);
