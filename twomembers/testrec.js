@@ -17,7 +17,7 @@ var pc = {};
 
 function initStream(){
    navigator.mediaDevices.getUserMedia({audio: true, video: false}).then(stream => {
-      console.log(stream);
+      console.log(stream.getTracks());
       Object.keys(pc).forEach(key => {
          console.log('Stream enviado para ' + key);
          pc[key].addTrack(stream.getTracks()[0]);
@@ -44,12 +44,14 @@ function addMember(member){
       audio.srcObject = stream;
       document.body.appendChild(audio);
    };
-   pcn.createOffer(offerOptions).then(offer => {
-      pcn.setLocalDescription(offer).then(() => {
-         console.log('Oferta para ' + member);
-         sendMessage({'sdp': pcn.localDescription}, member);
-      });
-   }).catch(err => console.log(err));
+   pcn.onnegotiationneeded = event => {
+      pcn.createOffer(offerOptions).then(offer => {
+         pcn.setLocalDescription(offer).then(() => {
+            console.log('Oferta para ' + member);
+            sendMessage({'sdp': pcn.localDescription}, member);
+         });
+      }).catch(err => console.log(err));
+   };
    pc[member] = pcn;
 }
 drone.on('open', error => {
