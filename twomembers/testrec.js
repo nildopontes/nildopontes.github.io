@@ -19,7 +19,7 @@ function initStream(){
    navigator.mediaDevices.getUserMedia({audio: true, video: false}).then(stream => {
       Object.keys(pc).forEach(key => {
          console.log('Stream enviado para ' + key);
-         pc[key].addTrack(stream.getTracks()[0]);
+         pc[key].addTrack(stream.getTracks()[0], stream);
       });
    });
 }
