@@ -14,14 +14,21 @@ const offerOptions = {
 };
 var room;
 var pc = {};
+var stream;
 
+navigator.mediaDevices.getUserMedia({audio: true, video: false}).then(s => {
+   stream = s.getTracks()[0];
+});
 function initStream(){
-   navigator.mediaDevices.getUserMedia({audio: true, video: false}).then(stream => {
-      console.log(stream.getTracks());
-      Object.keys(pc).forEach(key => {
-         console.log('Stream enviado para ' + key);
-         pc[key].addTrack(stream.getTracks()[0]);
-      });
+   Object.keys(pc).forEach(key => {
+      console.log('Stream enviado para ' + key);
+      pc[key].addTrack(stream);
+      pc[key].createOffer(offerOptions).then(offer => {
+         pc[key].setLocalDescription(offer).then(() => {
+            console.log('Oferta para ' + member);
+            sendMessage({'sdp': pc[key].localDescription}, member);
+         });
+      }).catch(err => console.log(err));
    });
 }
 function addMember(member){
@@ -43,14 +50,6 @@ function addMember(member){
       audio.setAttribute('autoplay', '');
       audio.srcObject = stream;
       document.body.appendChild(audio);
-   };
-   pcn.onnegotiationneeded = event => {
-      pcn.createOffer(offerOptions).then(offer => {
-         pcn.setLocalDescription(offer).then(() => {
-            console.log('Oferta para ' + member);
-            sendMessage({'sdp': pcn.localDescription}, member);
-         });
-      }).catch(err => console.log(err));
    };
    pc[member] = pcn;
 }
