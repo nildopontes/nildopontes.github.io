@@ -41,7 +41,7 @@ function addMember(member){
       console.log('Stream de ' + member);
       console.log(event);
       //const stream = event.streams[0];
-      const stream = new MediaStream(event.track);
+      const stream = new MediaStream([event.track]);
       let audio = document.createElement('audio');
       audio.setAttribute('id', member);
       audio.setAttribute('controls', '');
