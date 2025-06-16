@@ -39,9 +39,9 @@ function addMember(member){
    };
    pcn.ontrack = event => {
       console.log('Stream de ' + member);
+      console.log(event);
       //const stream = event.streams[0];
       const stream = new MediaStream(event.track);
-      console.log(event);
       let audio = document.createElement('audio');
       audio.setAttribute('id', member);
       audio.setAttribute('controls', '');
