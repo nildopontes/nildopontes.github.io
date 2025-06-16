@@ -24,6 +24,7 @@ body > div{
 }
 .foot{
    height:30px;
+   margin-top:20px;
    background:#EEE;
    line-height:30px;
 }
